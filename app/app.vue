@@ -19,10 +19,11 @@
 
 <style>
 html, body {
-  height: 100%;
+  height: 100vh;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  overflow: hidden;
 }
 body {
   background: #181c24;
@@ -30,11 +31,13 @@ body {
   font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   min-height: 100vh;
   min-width: 100vw;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .app-bg {
   min-height: 100vh;
   min-width: 100vw;
+  height: 100vh;
+  width: 100vw;
   background: #181c24;
   color: #f3f4f6;
   font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
@@ -43,7 +46,7 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .pattern-bg {
   position: fixed;
@@ -55,18 +58,21 @@ body {
   background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 2px, transparent 2px, transparent 24px), repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 2px, transparent 2px, transparent 24px);
 }
 .header {
-  z-index: 10;
+  z-index: 100;
   width: 100%;
-  padding: 2rem 1rem 1rem 1rem;
+  padding: 1.5rem 1rem 0.5rem 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
   border-bottom: 1px solid #23283a;
   background: rgba(24,28,36,0.85);
   backdrop-filter: blur(4px);
-  position: sticky;
+  position: fixed;
+  left: 0;
+  right: 0;
   top: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
+  height: 3.5rem;
 }
 .title {
   font-size: 2rem;
@@ -92,5 +98,9 @@ body {
   min-width: 50vw;
   max-width: 600px;
   margin: 0 auto;
+  height: 100vh;
+  padding-top: 3.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 </style>
