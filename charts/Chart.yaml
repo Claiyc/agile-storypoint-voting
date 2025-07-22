@@ -1,0 +1,15 @@
+apiVersion: v2
+name: agile-app
+version: 0.1.0
+description: Agile Story Point Voting App (Nuxt3 + Node.js + Redis + optional Ollama)
+type: application
+keywords:
+  - agile
+  - nuxt
+  - nodejs
+  - redis
+  - ollama
+maintainers:
+  - name: Claiyc
+    email: claiyc@outlook.com
+dependencies: [] 

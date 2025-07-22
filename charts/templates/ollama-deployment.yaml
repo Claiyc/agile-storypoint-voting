@@ -1,0 +1,31 @@
+{{- if .Values.ollama.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agile-app.fullname" . }}-ollama
+  labels:
+    {{- include "agile-app.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "agile-app.fullname" . }}-ollama
+  template:
+    metadata:
+      labels:
+        app: {{ include "agile-app.fullname" . }}-ollama
+    spec:
+      containers:
+        - name: ollama
+          image: "{{ .Values.ollama.image.repository }}:{{ .Values.ollama.image.tag }}"
+          imagePullPolicy: {{ .Values.ollama.image.pullPolicy }}
+          ports:
+            - containerPort: 11434
+          env:
+            {{- range $key, $value := .Values.ollama.env }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
+            {{- end }}
+          resources:
+            {{- toYaml .Values.ollama.resources | nindent 12 }}
+{{- end }} 

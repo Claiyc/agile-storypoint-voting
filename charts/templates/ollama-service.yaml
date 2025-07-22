@@ -1,0 +1,17 @@
+{{- if .Values.ollama.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "agile-app.fullname" . }}-ollama
+  labels:
+    {{- include "agile-app.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ollama.service.type }}
+  ports:
+    - port: {{ .Values.ollama.service.port }}
+      targetPort: 11434
+      protocol: TCP
+      name: ollama
+  selector:
+    app: {{ include "agile-app.fullname" . }}-ollama
+{{- end }} 

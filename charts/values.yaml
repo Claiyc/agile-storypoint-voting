@@ -1,0 +1,80 @@
+# Default values for agile-app Helm chart
+
+frontend:
+  image:
+    repository: your-frontend-image
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 3000
+  env: {}
+  resources: {}
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: frontend.local
+        paths:
+          - /
+    tls: []
+
+backend:
+  image:
+    repository: your-backend-image
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 3001
+  env:
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+    PORT: 3001
+    # REDIS_PASSWORD: ""
+    # OLLAMA_URL: "http://ollama:11434" # If using internal Ollama
+  resources: {}
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: backend.local
+        paths:
+          - /
+    tls: []
+
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 7-alpine
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 6379
+  persistence:
+    enabled: false
+    size: 1Gi
+    storageClass: ""
+  resources: {}
+  password: ""
+
+ollama:
+  enabled: false
+  image:
+    repository: ollama/ollama
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 11434
+  resources: {}
+  env: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {} 
