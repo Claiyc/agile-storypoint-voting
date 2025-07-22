@@ -114,7 +114,14 @@
           </table>
         </div>
         <div v-if="voting.active" class="sticky-timer mb-4">
-          <div class="timer-card">⏳ {{ voting.seconds }}s</div>
+          <div class="timer-card">⏳ {{ voting.seconds }}s
+            <button v-if="isOwner" class="skip-timer-btn" @click="skipTimer" title="Skip timer and reveal votes" aria-label="Skip timer">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+                <path d="M5 10h10M13 7l3 3-3 3" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="skip-timer-label">Skip</span>
+            </button>
+          </div>
         </div>
         <div v-if="!voting.active && isOwner" class="mb-6">
           <div class="voting-timer-row">
@@ -275,7 +282,10 @@ function tryJoinSession() {
 }
 onMounted(() => {
   tryJoinSession();
-  // send({ type: 'get-owner', code }); // Remove from here
+  // Preload pling sound
+  if (plingAudio.value) {
+    plingAudio.value.load();
+  }
 });
 watch(() => route.query.name, (newName) => {
   name.value = newName ? String(newName) : '';
@@ -335,6 +345,10 @@ function stopHoldTimer(type, event) {
 
 function promoteMember(targetName) {
   send({ type: 'promote-member', userName: targetName });
+}
+
+function skipTimer() {
+  send({ type: 'skip-timer' });
 }
 
 const memberRows = computed(() => {
@@ -493,6 +507,9 @@ function segmentFlexStyle(count, idx) {
   border-radius: 6px;
   font-weight: bold;
   font-size: 1.1em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 .flex-wrap { display: flex; flex-wrap: wrap; }
 .gap-2 { gap: 0.5rem; }
@@ -870,5 +887,28 @@ function segmentFlexStyle(count, idx) {
   box-shadow: 0 0 4px #23283a;
   background: #181c24;
   border-radius: 4px;
+}
+.skip-timer-btn {
+  background: none;
+  border: none;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  vertical-align: middle;
+  outline: none;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background 0.15s, box-shadow 0.15s;
+  display: inline-flex;
+  align-items: center;
+}
+.skip-timer-btn:hover, .skip-timer-btn:focus {
+  background: #181c24;
+  box-shadow: 0 0 4px #23283a;
+}
+.skip-timer-label {
+  margin-left: 2px;
+  color: #fbbf24;
+  font-size: 1em;
+  font-weight: 500;
 }
 </style> 

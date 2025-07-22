@@ -186,6 +186,24 @@ wss.on('connection', (ws) => {
           console.log(`[VOTE] User: ${ws.userName}, Session: ${code}, Point: ${data.point}`);
           break;
         }
+        case 'skip-timer': {
+          const code = ws.sessionCode;
+          if (!code || ws.userName !== (await redisClient.hGet(`session:${code}`, 'owner'))) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Only the session owner can skip the timer.' }));
+            return;
+          }
+          if (!sessionVoting[code]?.active) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Voting is not active.' }));
+            return;
+          }
+          // End the timer and reveal votes
+          clearInterval(sessionVoting[code].timer);
+          sessionVoting[code].active = false;
+          broadcastVotingState(code, { active: false, seconds: 0 });
+          broadcastVotingResults(code, sessionVotes[code]);
+          console.log(`[TIMER SKIPPED] Session: ${code}, Owner: ${ws.userName}`);
+          break;
+        }
         case 'get-owner': {
           const code = data.code;
           if (!code) return;
