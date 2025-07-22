@@ -57,20 +57,21 @@ function joinSession() {
 
 <style scoped>
 .container {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
 }
 .card {
   max-width: 400px;
   width: 100%;
   margin: 0 auto;
   padding: 2.5rem 2rem 2rem 2rem;
-  background: #fff;
+  background: #23283a;
+  color: #f3f4f6;
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(37,99,235,0.08);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
 }
 .text-center { text-align: center; }
 .mt-4 { margin-top: 1rem; }
@@ -83,19 +84,22 @@ function joinSession() {
 }
 label {
   font-size: 0.95em;
-  color: #374151;
+  color: #cbd5e1;
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
 input {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid #374151;
   border-radius: 6px;
   font-size: 1rem;
-  color: #1f2937;
-  background-color: #f9fafb;
+  color: #f3f4f6;
+  background-color: #181c24;
   transition: border-color 0.2s ease-in-out;
+}
+input::placeholder {
+  color: #a1a1aa;
 }
 input:focus {
   outline: none;
@@ -111,6 +115,8 @@ input:focus {
   font-weight: 600;
   letter-spacing: 0.01em;
   transition: background 0.2s, color 0.2s;
+  background: #2563eb;
+  color: #fff;
 }
 .btn-primary {
   background: #2563eb;
@@ -127,7 +133,7 @@ input:focus {
 .error {
   color: #dc2626;
   font-weight: 500;
-  background: #fef2f2;
+  background: #2d1a1a;
   border-radius: 6px;
   padding: 0.5rem 1rem;
   margin-top: 1rem;

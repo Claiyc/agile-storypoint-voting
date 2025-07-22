@@ -6,3 +6,17 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped 
+  backend:
+    build:
+      context: .
+    container_name: agile-backend
+    ports:
+      - "3001:3001"
+    depends_on:
+      - redis
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # - REDIS_PASSWORD=yourpassword  # Uncomment and set if needed
+      - PORT=3001 

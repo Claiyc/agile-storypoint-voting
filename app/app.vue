@@ -1,13 +1,13 @@
 <template>
-  <div class="min-h-screen bg-dark text-white font-sans flex flex-col items-center justify-center relative overflow-x-hidden">
+  <div class="app-bg">
     <!-- Modern dark background pattern -->
-    <div class="fixed inset-0 z-0 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 opacity-95 pointer-events-none"></div>
+    <div class="pattern-bg"></div>
     <!-- Header for the Agile Story Point Voting System -->
-    <header class="z-10 w-full py-6 px-4 flex justify-center items-center border-b border-dark-800 bg-dark/80 backdrop-blur sticky top-0">
-      <h1 class="text-3xl font-bold tracking-tight text-accent">Agile Story Point Voting</h1>
+    <header class="header">
+      <h1 class="title">Agile Story Point Voting</h1>
     </header>
     <!-- Nuxt page slot for rendering child pages -->
-    <main class="z-10 flex-1 w-full flex flex-col items-center justify-center">
+    <main class="main">
       <NuxtPage />
     </main>
   </div>
@@ -16,3 +16,81 @@
 <script setup>
 // This is the root layout for the Nuxt app. All pages will be rendered inside <NuxtPage />.
 </script>
+
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background: #181c24;
+  color: #f3f4f6;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  min-height: 100vh;
+  min-width: 100vw;
+  overflow-x: hidden;
+}
+.app-bg {
+  min-height: 100vh;
+  min-width: 100vw;
+  background: #181c24;
+  color: #f3f4f6;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow-x: hidden;
+}
+.pattern-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-color: transparent;
+  background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 2px, transparent 2px, transparent 24px), repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 2px, transparent 2px, transparent 24px);
+}
+.header {
+  z-index: 10;
+  width: 100%;
+  padding: 2rem 1rem 1rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid #23283a;
+  background: rgba(24,28,36,0.85);
+  backdrop-filter: blur(4px);
+  position: sticky;
+  top: 0;
+  margin-bottom: 2rem;
+}
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 0.02em;
+  color: #60a5fa;
+  text-align: center;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  border-radius: 10px;
+  background: rgba(35,40,58,0.7);
+  margin: 0 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  display: inline-block;
+}
+.main {
+  z-index: 10;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 50vw;
+  max-width: 600px;
+  margin: 0 auto;
+}
+</style>

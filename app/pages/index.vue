@@ -22,20 +22,21 @@ const navigateTo = useRouter().push;
 
 <style scoped>
 .container {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
 }
 .card {
   max-width: 400px;
   width: 100%;
   margin: 0 auto;
   padding: 2rem;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: #23283a;
+  color: #f3f4f6;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
 }
 .text-center { text-align: center; }
 .mb-8 { margin-bottom: 2rem; }
@@ -45,13 +46,19 @@ const navigateTo = useRouter().push;
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
+  background: #2563eb;
+  color: #fff;
+  transition: background 0.2s;
 }
 .btn-primary {
   background: #2563eb;
   color: #fff;
 }
+.btn-primary:hover {
+  background: #1d4ed8;
+}
 .btn-secondary {
-  background: #e5e7eb;
-  color: #111;
+  background: #374151;
+  color: #f3f4f6;
 }
 </style> 

@@ -69,20 +69,21 @@ function goToSession() {
 
 <style scoped>
 .container {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
 }
 .card {
   max-width: 400px;
   width: 100%;
   margin: 0 auto;
   padding: 2rem;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: #23283a;
+  color: #f3f4f6;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
 }
 .text-center { text-align: center; }
 .mt-6 { margin-top: 1.5rem; }
@@ -91,9 +92,14 @@ function goToSession() {
 .form-group { margin-bottom: 1rem; display: flex; flex-direction: column; }
 input {
   padding: 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid #374151;
   border-radius: 4px;
   font-size: 1rem;
+  background: #181c24;
+  color: #f3f4f6;
+}
+input::placeholder {
+  color: #a1a1aa;
 }
 .btn {
   padding: 0.75rem 1.5rem;
@@ -101,10 +107,16 @@ input {
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
+  background: #2563eb;
+  color: #fff;
+  transition: background 0.2s;
 }
 .btn-primary {
   background: #2563eb;
   color: #fff;
+}
+.btn-primary:hover {
+  background: #1d4ed8;
 }
 .error {
   color: #dc2626;

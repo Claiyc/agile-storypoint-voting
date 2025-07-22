@@ -34,7 +34,11 @@
             <tbody>
               <tr v-for="row in memberRows" :key="row.name">
                 <td>{{ row.name }}</td>
-                <td>{{ row.vote }}</td>
+                <td>
+                  {{ row.vote }}
+                  <span v-if="row.mark === 'high' || row.mark === 'both'" title="Highest vote" style="font-size:0.9em; color:#22c55e; margin-left:2px;">▲</span>
+                  <span v-if="row.mark === 'low' || row.mark === 'both'" title="Lowest vote" style="font-size:0.9em; color:#ef4444; margin-left:2px;">▼</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -156,7 +160,22 @@ function saveTitle() { send({ type: 'update-title', title: titleInput.value }); 
 const memberRows = computed(() => {
   if (!members.value.length) return [];
   if (results.value && results.value.votes) {
-    return members.value.map(name => ({ name, vote: results.value.votes[name] ?? '-' }));
+    // Find numeric votes only
+    const numericVotes = Object.values(results.value.votes).filter(v => typeof v === 'number');
+    let max = null, min = null;
+    if (numericVotes.length) {
+      max = Math.max(...numericVotes);
+      min = Math.min(...numericVotes);
+    }
+    return members.value.map(name => {
+      const vote = results.value.votes[name] ?? '-';
+      let mark = '';
+      if (typeof vote === 'number') {
+        if (vote === max && max !== min) mark = 'high';
+        if (vote === min && max !== min) mark = mark ? 'both' : 'low';
+      }
+      return { name, vote, mark };
+    });
   }
   return members.value.map(name => ({ name, vote: '-' }));
 });
@@ -193,26 +212,38 @@ function segmentFlexStyle(count, idx) {
 
 <style scoped>
 .container {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
 }
 .card {
   max-width: 600px;
   width: 100%;
   margin: 0 auto;
   padding: 2rem;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: #23283a;
+  color: #f3f4f6;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
 }
 .header {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 1rem;
+}
+.header h2.text-center {
+  background: rgba(35,40,58,0.85);
+  color: #60a5fa;
+  padding: 0.5rem 2rem;
+  border-radius: 10px;
+  margin: 0 1rem 1rem 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-word;
 }
 .edit-title-row {
   display: flex;
@@ -221,10 +252,12 @@ function segmentFlexStyle(count, idx) {
 }
 .title-input {
   padding: 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid #374151;
   border-radius: 4px;
   font-size: 1rem;
   width: 60%;
+  background: #181c24;
+  color: #f3f4f6;
 }
 .session-code {
   font-family: monospace;
@@ -243,9 +276,11 @@ function segmentFlexStyle(count, idx) {
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.5rem;
+  background: #23283a;
+  color: #f3f4f6;
 }
 .table th, .table td {
-  border: 1px solid #e5e7eb;
+  border: 1px solid #374151;
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
@@ -255,8 +290,8 @@ function segmentFlexStyle(count, idx) {
   margin-bottom: 1rem;
 }
 .timer-card {
-  background: #e0e7ff;
-  color: #1e40af;
+  background: #374151;
+  color: #60a5fa;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-weight: bold;
@@ -271,18 +306,24 @@ function segmentFlexStyle(count, idx) {
   font-size: 1rem;
   cursor: pointer;
   margin-right: 0.25rem;
+  background: #2563eb;
+  color: #fff;
+  transition: background 0.2s;
 }
 .btn-primary {
   background: #2563eb;
   color: #fff;
 }
+.btn-primary:hover {
+  background: #1d4ed8;
+}
 .btn-secondary {
-  background: #e5e7eb;
-  color: #111;
+  background: #374151;
+  color: #f3f4f6;
 }
 .btn-outline {
-  background: #fff;
-  color: #2563eb;
+  background: #181c24;
+  color: #60a5fa;
   border: 1px solid #2563eb;
 }
 .btn-sm {
@@ -294,8 +335,8 @@ function segmentFlexStyle(count, idx) {
   color: #dc2626;
 }
 .dist-card {
-  background: #e0e7ff;
-  color: #1e40af;
+  background: #374151;
+  color: #60a5fa;
   padding: 0.25rem 0.75rem;
   border-radius: 6px;
   font-size: 0.95em;
@@ -337,7 +378,7 @@ function segmentFlexStyle(count, idx) {
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(37,99,235,0.08);
-  background: #e5e7eb;
+  background: #181c24;
   min-height: 2.2rem;
 }
 .dist-bar-segment-full {
@@ -371,18 +412,18 @@ function segmentFlexStyle(count, idx) {
 }
 .inline-label {
   font-size: 0.95em;
-  color: #374151;
+  color: #cbd5e1;
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
 .inline-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid #374151;
   border-radius: 6px;
   font-size: 1rem;
-  color: #1f2937;
-  background-color: #f9fafb;
+  color: #f3f4f6;
+  background-color: #181c24;
   transition: border-color 0.2s ease-in-out;
 }
 .inline-input:focus {
