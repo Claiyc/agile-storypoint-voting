@@ -62,6 +62,10 @@ function joinSession() {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
 }
 .card {
   max-width: 400px;
@@ -90,6 +94,7 @@ label {
 }
 input {
   width: 100%;
+  box-sizing: border-box;
   padding: 0.5rem 0.75rem;
   border: 1px solid #374151;
   border-radius: 6px;

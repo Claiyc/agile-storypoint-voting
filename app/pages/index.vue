@@ -27,6 +27,10 @@ const navigateTo = useRouter().push;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
 }
 .card {
   max-width: 400px;
