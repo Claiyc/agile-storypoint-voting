@@ -182,6 +182,12 @@ wss.on('connection', (ws) => {
           sessionVotes[code][ws.userName] = data.point;
           // Optionally, acknowledge
           ws.send(JSON.stringify({ type: 'vote-received' }));
+          // Broadcast to all: this user has voted
+          for (const client of sessions[code]) {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({ type: 'voted', userName: ws.userName }));
+            }
+          }
           // Log
           console.log(`[VOTE] User: ${ws.userName}, Session: ${code}, Point: ${data.point}`);
           break;

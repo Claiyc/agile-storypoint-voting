@@ -105,7 +105,20 @@
                   </button>
                 </td>
                 <td>
-                  {{ row.vote }}
+                  <template v-if="results">
+                    {{ row.vote }}
+                  </template>
+                  <template v-else-if="voting.active">
+                    <span v-if="row.vote === 'pending'" class="vote-status-icon" title="Waiting for vote">
+                      <svg class="spinner" width="18" height="18" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke="#60a5fa" stroke-width="5"></circle></svg>
+                    </span>
+                    <span v-else-if="row.vote === 'voted'" class="vote-status-icon" title="Voted">
+                      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 10l4 4 6-8" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                  </template>
+                  <template v-else>
+                    -
+                  </template>
                   <span v-if="row.mark === 'high' || row.mark === 'both'" title="Highest vote" style="font-size:0.9em; color:#22c55e; margin-left:2px;">▲</span>
                   <span v-if="row.mark === 'low' || row.mark === 'both'" title="Lowest vote" style="font-size:0.9em; color:#ef4444; margin-left:2px;">▼</span>
                 </td>
@@ -230,6 +243,7 @@ function shareSession() {
 
 const plingAudio = ref(null);
 let lastVotingStart = 0;
+const votedMembers = ref(new Set());
 
 onMessage((msg) => {
   if (msg.type === 'members') {
@@ -238,7 +252,8 @@ onMessage((msg) => {
     if (name.value && members.value.includes(name.value)) {
       send({ type: 'get-owner', code });
     }
-    // ownerName will be updated by a separate message
+    // Reset votedMembers when members list changes (new round)
+    votedMembers.value = new Set();
   } else if (msg.type === 'voting-state') {
     // Play pling sound when voting starts
     if (msg.active && (!voting.value.active || voting.value.seconds === 0)) {
@@ -249,14 +264,20 @@ onMessage((msg) => {
       // Clear previous results and vote
       results.value = null;
       vote.value = null;
+      votedMembers.value = new Set(); // Reset on new voting round
     }
     voting.value.active = msg.active;
     voting.value.seconds = msg.seconds;
     if (!msg.active) vote.value = null;
     if (!msg.active) results.value = null;
+    if (!msg.active) votedMembers.value = new Set(); // Reset when voting ends
   } else if (msg.type === 'votes-revealed') {
     results.value = msg;
     voting.value.active = false;
+    votedMembers.value = new Set(); // Reset when votes are revealed
+  } else if (msg.type === 'voted') {
+    votedMembers.value = new Set(votedMembers.value);
+    votedMembers.value.add(msg.userName);
   } else if (msg.type === 'session-title') {
     title.value = msg.title;
     if (!editingTitle.value) titleInput.value = msg.title;
@@ -308,6 +329,9 @@ function startVoting() { send({ type: 'start-voting', duration: votingDuration.v
 function submitVote(point) {
   if (voting.value.active) {
     vote.value = point;
+    // Optimistically add self to votedMembers
+    votedMembers.value = new Set(votedMembers.value);
+    votedMembers.value.add(name.value);
     send({ type: 'submit-vote', point });
   }
 }
@@ -371,6 +395,15 @@ const memberRows = computed(() => {
       return { name, vote, mark };
     });
   }
+  // Voting in progress: show spinner or checkmark
+  if (voting.value.active) {
+    return members.value.map(memberName => {
+      const hasVoted = votedMembers.value.has(memberName);
+      // If results.value exists, show nothing (shouldn't happen here)
+      return { name: memberName, vote: hasVoted ? 'voted' : 'pending', mark: '' };
+    });
+  }
+  // Default: no votes yet
   return members.value.map(name => ({ name, vote: '-' }));
 });
 const filteredDistribution = computed(() => {
@@ -911,4 +944,7 @@ function segmentFlexStyle(count, idx) {
   font-size: 1em;
   font-weight: 500;
 }
+.vote-status-icon { display: inline-block; vertical-align: middle; margin-left: 2px; }
+.spinner { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
 </style> 
