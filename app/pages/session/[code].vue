@@ -163,7 +163,6 @@
 import { useRoute, useRouter } from 'vue-router';
 import { ref, computed, onMounted, watch } from 'vue';
 import { useWebSocket } from '../../composables/useWebSocket';
-
 const route = useRoute();
 const router = useRouter();
 const code = route.params.code;
@@ -173,7 +172,7 @@ const title = ref('');
 const editingTitle = ref(false);
 const titleInput = ref('');
 const members = ref([]);
-const { onMessage, send, isConnected } = useWebSocket();
+const { onMessage, send, isConnected, address } = useWebSocket();
 const voting = ref({ active: false, seconds: 0 });
 const vote = ref(null);
 const results = ref(null);
@@ -221,6 +220,9 @@ onMessage((msg) => {
         plingAudio.value.currentTime = 0;
         plingAudio.value.play();
       }
+      // Clear previous results and vote
+      results.value = null;
+      vote.value = null;
     }
     voting.value.active = msg.active;
     voting.value.seconds = msg.seconds;
@@ -251,9 +253,8 @@ watch(() => route.query.name, (newName) => {
   hasJoined.value = false;
   tryJoinSession();
 });
-watch(members, (newMembers) => {
-  if (name.value && !newMembers.includes(name.value)) {
-    hasJoined.value = false;
+watch(isConnected, (val) => {
+  if (val) {
     tryJoinSession();
   }
 });
