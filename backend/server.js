@@ -182,12 +182,20 @@ wss.on('connection', (ws) => {
     }
   });
 
-  ws.on('close', () => {
+  ws.on('close', async () => {
     // Remove from session set on disconnect
     if (ws.sessionCode && sessions[ws.sessionCode]) {
       sessions[ws.sessionCode].delete(ws);
       if (ws.userName && sessionMembers[ws.sessionCode]) {
+        const code = ws.sessionCode;
+        const wasOwner = ws.userName === await redisClient.hGet(`session:${code}`, 'owner');
         sessionMembers[ws.sessionCode].delete(ws.userName);
+        // If the owner left, transfer ownership to the next member (if any)
+        if (wasOwner && sessionMembers[code] && sessionMembers[code].size > 0) {
+          const nextOwner = Array.from(sessionMembers[code])[0];
+          await redisClient.hSet(`session:${code}`, 'owner', nextOwner);
+          console.log(`[OWNER TRANSFERRED] Session: ${code}, New Owner: ${nextOwner}`);
+        }
         broadcastMembers(ws.sessionCode);
         // Log user leaving
         console.log(`[USER LEFT] User: ${ws.userName} left session: ${ws.sessionCode}`);
