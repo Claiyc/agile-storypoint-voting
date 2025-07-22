@@ -156,6 +156,7 @@
       </div>
     </div>
   </div>
+  <audio ref="plingAudio" src="/ding-36029.mp3" preload="auto" style="display:none" />
 </template>
 
 <script setup>
@@ -204,6 +205,9 @@ function shareSession() {
   }
 }
 
+const plingAudio = ref(null);
+let lastVotingStart = 0;
+
 onMessage((msg) => {
   if (msg.type === 'members') {
     members.value = msg.members;
@@ -211,6 +215,13 @@ onMessage((msg) => {
       isOwner.value = (members.value[0] === name.value);
     }
   } else if (msg.type === 'voting-state') {
+    // Play pling sound when voting starts
+    if (msg.active && (!voting.value.active || voting.value.seconds === 0)) {
+      if (plingAudio.value) {
+        plingAudio.value.currentTime = 0;
+        plingAudio.value.play();
+      }
+    }
     voting.value.active = msg.active;
     voting.value.seconds = msg.seconds;
     if (!msg.active) vote.value = null;

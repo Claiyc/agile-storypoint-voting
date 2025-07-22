@@ -4,7 +4,7 @@
     <div class="pattern-bg"></div>
     <!-- Header for the Agile Story Point Voting System -->
     <header class="header">
-      <h1 class="title">Agile Story Point Voting</h1>
+      <NuxtLink to="/" class="title clickable-title">Agile Story Point Voting</NuxtLink>
     </header>
     <!-- Nuxt page slot for rendering child pages -->
     <main class="main">
@@ -86,6 +86,15 @@ body {
   margin: 0 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
   display: inline-block;
+}
+.title.clickable-title {
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+}
+.title.clickable-title:hover, .title.clickable-title:focus {
+  background: #23283a;
+  color: #93c5fd;
 }
 .main {
   z-index: 10;
