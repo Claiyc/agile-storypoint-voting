@@ -2,13 +2,15 @@
   <div class="container">
     <div class="card">
       <div class="header">
-        <h2 v-if="!editingTitle" class="text-center">{{ title }}</h2>
-        <div v-else class="edit-title-row">
-          <input v-model="titleInput" class="title-input" />
-          <button class="btn btn-primary btn-sm" @click="saveTitle">Save</button>
-          <button class="btn btn-secondary btn-sm" @click="cancelEdit">Cancel</button>
+        <div class="title-box">
+          <h2 v-if="!editingTitle" class="text-center">{{ title }}</h2>
+          <div v-else class="edit-title-row">
+            <input v-model="titleInput" class="title-input" />
+            <button class="btn btn-primary btn-sm" @click="saveTitle">Save</button>
+            <button class="btn btn-secondary btn-sm" @click="cancelEdit">Cancel</button>
+          </div>
         </div>
-        <button v-if="isOwner && !editingTitle" class="btn btn-secondary btn-sm ml-2" @click="editTitle">Edit Title</button>
+        <button v-if="isOwner && !editingTitle" class="btn btn-secondary btn-sm ml-2 edit-title-btn" @click="editTitle">Edit Title</button>
       </div>
       <div class="mb-4 text-center">
         <strong>Session Code:</strong> <span class="session-code">{{ code }}</span>
@@ -217,6 +219,10 @@ function segmentFlexStyle(count, idx) {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
 }
 .card {
   max-width: 600px;
@@ -227,22 +233,35 @@ function segmentFlexStyle(count, idx) {
   color: #f3f4f6;
   border-radius: 12px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 .header {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 1rem;
+  width: 100%;
+}
+.title-box {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(35,40,58,0.85);
+  border-radius: 10px;
+  margin: 0 2rem 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  padding: 0.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .header h2.text-center {
-  background: rgba(35,40,58,0.85);
   color: #60a5fa;
-  padding: 0.5rem 2rem;
-  border-radius: 10px;
-  margin: 0 1rem 1rem 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  display: inline-block;
-  max-width: 100%;
+  text-align: center;
+  margin: 0;
+  background: none;
+  width: 100%;
   word-break: break-word;
 }
 .edit-title-row {
@@ -433,5 +452,8 @@ function segmentFlexStyle(count, idx) {
 }
 .btn-left {
   margin-left: auto;
+}
+.edit-title-btn {
+  margin: 0 2rem 0 2rem;
 }
 </style> 
