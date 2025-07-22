@@ -9,7 +9,9 @@ frontend:
   service:
     type: ClusterIP
     port: 3000
-  env: {}
+  env:
+    NUXT_PUBLIC_WS_URL: ws://localhost:3001  # Default WebSocket URL for Nuxt runtimeConfig
+    NUXT_PUBLIC_GOTO_BASE_URL: https://www.google.com/search?q=  # Default for the "Go to" button
   resources: {}
   ingress:
     enabled: false

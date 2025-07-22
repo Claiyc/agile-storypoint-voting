@@ -45,10 +45,10 @@
               <a
                 v-if="title && title.trim()"
                 class="goto-jira-btn"
-                :href="`https://jira.frequentis.com/browse/${encodeURIComponent(title)}`"
+                :href="gotoBaseUrl + encodeURIComponent(title)"
                 target="_blank"
                 rel="noopener noreferrer"
-                :title="`Go to Jira: ${title}`"
+                :title="`Go to: ${gotoBaseUrl}${encodeURIComponent(title)}`"
                 aria-label="Go to Jira"
               >
                 <svg width="28" height="28" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -199,6 +199,7 @@
 import { useRoute, useRouter } from 'vue-router';
 import { ref, computed, onMounted, watch } from 'vue';
 import { useWebSocket } from '../../composables/useWebSocket';
+import { useRuntimeConfig } from '#app';
 const route = useRoute();
 const router = useRouter();
 const code = route.params.code;
