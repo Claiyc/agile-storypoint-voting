@@ -53,11 +53,11 @@
           <div class="timer-card">⏳ {{ voting.seconds }}s</div>
         </div>
         <div v-if="!voting.active && isOwner" class="mb-6">
-          <div class="mb-2" style="text-align:center;">
-            <label for="votingDuration" style="font-weight:500;">Voting Timer (seconds):</label>
-            <input id="votingDuration" type="number" min="5" max="120" v-model.number="votingDuration" style="width:80px; margin-left:0.5rem; background:#181c24; color:#f3f4f6; border:1px solid #374151; border-radius:4px; padding:0.25rem 0.5rem; text-align:center;" />
+          <div class="voting-timer-row">
+            <label for="votingDuration" class="voting-timer-label">Voting Timer (seconds):</label>
+            <input id="votingDuration" type="number" min="5" max="120" v-model.number="votingDuration" class="voting-timer-input" />
+            <button class="btn btn-primary voting-timer-btn" @click="startVoting">Start Voting</button>
           </div>
-          <button class="btn btn-primary" @click="startVoting">Start Voting</button>
         </div>
         <div v-if="voting.active" class="mb-6">
           <div class="font-semibold">Voting in progress! Choose your story point:</div>
@@ -458,5 +458,38 @@ function segmentFlexStyle(count, idx) {
 }
 .btn-left {
   margin-left: auto;
+}
+.voting-timer-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.voting-timer-label {
+  font-weight: 500;
+  color: #f3f4f6;
+  margin-right: 0.25rem;
+}
+.voting-timer-input {
+  width: 80px;
+  background: #181c24;
+  color: #f3f4f6;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+  font-size: 1rem;
+  height: 2.5rem;
+  margin-right: 0.25rem;
+}
+.voting-timer-btn {
+  height: 2.5rem;
+  padding: 0 1.25rem;
+  font-size: 1rem;
+  margin-left: 0.25rem;
+  display: flex;
+  align-items: center;
 }
 </style> 
