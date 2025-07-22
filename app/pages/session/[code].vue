@@ -208,7 +208,6 @@ function segmentFlexStyle(count, idx) {
     fontSize: '1em',
     minWidth: '2.5rem',
     position: 'relative',
-    borderRight: '2px solid #fff',
     transition: 'none',
     height: '2.2rem',
     overflow: 'hidden',
