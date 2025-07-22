@@ -87,7 +87,18 @@
             </thead>
             <tbody>
               <tr v-for="row in memberRows" :key="row.name">
-                <td>{{ row.name }}</td>
+                <td>
+                  {{ row.name }}
+                  <span v-if="members.length && row.name === members[0]" title="Session creator" style="margin-left:4px; vertical-align:middle; display:inline-block; position:relative; top:-2px;">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+                      <path d="M3 7l3.5 5 3.5-7 3.5 7L17 7" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="3" cy="7" r="1" fill="#fbbf24"/>
+                      <circle cx="10" cy="5" r="1" fill="#fbbf24"/>
+                      <circle cx="17" cy="7" r="1" fill="#fbbf24"/>
+                      <rect x="6" y="13" width="8" height="2" rx="1" fill="#fbbf24"/>
+                    </svg>
+                  </span>
+                </td>
                 <td>
                   {{ row.vote }}
                   <span v-if="row.mark === 'high' || row.mark === 'both'" title="Highest vote" style="font-size:0.9em; color:#22c55e; margin-left:2px;">▲</span>
