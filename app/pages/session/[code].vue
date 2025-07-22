@@ -55,7 +55,11 @@
         <div v-if="!voting.active && isOwner" class="mb-6">
           <div class="voting-timer-row">
             <label for="votingDuration" class="voting-timer-label">Voting Timer (seconds):</label>
-            <input id="votingDuration" type="number" min="5" max="120" v-model.number="votingDuration" class="voting-timer-input" />
+            <div class="voting-timer-custom-group">
+              <button class="voting-timer-incdec" @click="decrementTimer" aria-label="Decrease timer" tabindex="0">&#8722;</button>
+              <input id="votingDuration" type="text" :value="votingDuration" readonly class="voting-timer-input-custom" />
+              <button class="voting-timer-incdec" @click="incrementTimer" aria-label="Increase timer" tabindex="0">&#43;</button>
+            </div>
             <button class="btn btn-primary voting-timer-btn" @click="startVoting">Start Voting</button>
           </div>
         </div>
@@ -167,6 +171,12 @@ function submitVote(point) {
 function editTitle() { editingTitle.value = true; titleInput.value = title.value; }
 function cancelEdit() { editingTitle.value = false; titleInput.value = title.value; }
 function saveTitle() { send({ type: 'update-title', title: titleInput.value }); editingTitle.value = false; }
+function incrementTimer() {
+  if (votingDuration.value < 120) votingDuration.value++;
+}
+function decrementTimer() {
+  if (votingDuration.value > 5) votingDuration.value--;
+}
 
 const memberRows = computed(() => {
   if (!members.value.length) return [];
@@ -472,17 +482,43 @@ function segmentFlexStyle(count, idx) {
   color: #f3f4f6;
   margin-right: 0.25rem;
 }
-.voting-timer-input {
-  width: 80px;
+.voting-timer-custom-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   background: #181c24;
-  color: #f3f4f6;
   border: 1px solid #374151;
   border-radius: 4px;
-  padding: 0.4rem 0.5rem;
+  height: 2.5rem;
+  margin-right: 0.25rem;
+}
+.voting-timer-input-custom {
+  width: 56px;
+  background: transparent;
+  color: #f3f4f6;
+  border: none;
   text-align: center;
   font-size: 1rem;
   height: 2.5rem;
-  margin-right: 0.25rem;
+  outline: none;
+  pointer-events: none;
+}
+.voting-timer-incdec {
+  width: 2.2rem;
+  height: 2.5rem;
+  background: none;
+  border: none;
+  color: #60a5fa;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  border-radius: 4px;
+}
+.voting-timer-incdec:hover, .voting-timer-incdec:focus {
+  background: #23283a;
 }
 .voting-timer-btn {
   height: 2.5rem;
