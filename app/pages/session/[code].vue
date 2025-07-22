@@ -1,6 +1,18 @@
 <template>
   <div class="container">
     <div class="card">
+      <div class="share-btn-row">
+        <button class="share-btn" @click="shareSession" :title="shareTooltip" aria-label="Share session">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="19" r="2" stroke="#60a5fa" stroke-width="1.5"/>
+            <circle cx="6" cy="12" r="2" stroke="#60a5fa" stroke-width="1.5"/>
+            <circle cx="18" cy="5" r="2" stroke="#60a5fa" stroke-width="1.5"/>
+            <line x1="7.7" y1="13.2" x2="16.3" y2="17.8" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="16.3" y1="6.2" x2="7.7" y2="10.8" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <transition name="fade"><div v-if="shareTooltip === 'Shared!' || shareTooltip === 'Link copied!'" class="share-feedback">{{ shareTooltip }}</div></transition>
+      </div>
       <div class="session-title-box">
         <template v-if="!editingTitle">
           <h2 class="session-title">{{ title }}</h2>
@@ -16,8 +28,17 @@
       <div v-if="isOwner && !editingTitle" class="edit-title-btn-row">
         <button class="btn btn-secondary btn-sm" @click="editTitle">Edit Title</button>
       </div>
-      <div class="mb-4 text-center">
+      <div class="mb-4 text-center session-code-row">
         <strong>Session Code:</strong> <span class="session-code">{{ code }}</span>
+        <span class="copy-btn-group">
+          <button class="copy-btn" @click="copySessionCode" :title="copyTooltip" aria-label="Copy session code">
+            <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="5" width="8" height="8" rx="2" stroke="#60a5fa" stroke-width="1.5"/>
+              <rect x="3" y="3" width="8" height="8" rx="2" stroke="#60a5fa" stroke-width="1.5"/>
+            </svg>
+          </button>
+          <transition name="fade"><div v-if="copyTooltip === 'Copied!'" class="copy-feedback-popup">Copied!</div></transition>
+        </span>
       </div>
       <div v-if="!name || name === ''">
         <form @submit.prevent="submitName" class="space-y-4">
@@ -32,7 +53,7 @@
       <div v-else>
         <div class="mb-2">Welcome, <strong>{{ name }}</strong>!</div>
         <div class="mb-6">
-          <div class="font-semibold">Members in this session:</div>
+          <div class="font-semibold">Members:</div>
           <table class="table mt-2">
             <thead>
               <tr><th>Name</th><th>Vote</th></tr>
@@ -54,10 +75,11 @@
         </div>
         <div v-if="!voting.active && isOwner" class="mb-6">
           <div class="voting-timer-row">
-            <label for="votingDuration" class="voting-timer-label">Voting Timer (seconds):</label>
             <div class="voting-timer-custom-group">
               <button class="voting-timer-incdec" @click="decrementTimer" aria-label="Decrease timer" tabindex="0">&#8722;</button>
-              <input id="votingDuration" type="text" :value="votingDuration" readonly class="voting-timer-input-custom" />
+              <span class="voting-timer-input-custom">
+                {{ votingDuration }}<span class="voting-timer-s">s</span>
+              </span>
               <button class="voting-timer-incdec" @click="incrementTimer" aria-label="Increase timer" tabindex="0">&#43;</button>
             </div>
             <button class="btn btn-primary voting-timer-btn" @click="startVoting">Start Voting</button>
@@ -66,9 +88,15 @@
         <div v-if="voting.active" class="mb-6">
           <div class="font-semibold">Voting in progress! Choose your story point:</div>
           <div class="flex-wrap gap-2 mt-2" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
-            <button v-for="point in points" :key="point" :disabled="!voting.active" class="btn btn-outline" @click="submitVote(point)">{{ point }}</button>
+            <button
+              v-for="point in points"
+              :key="point"
+              :disabled="!voting.active"
+              class="btn btn-outline"
+              :class="{ 'btn-voted': vote === point }"
+              @click="submitVote(point)"
+            >{{ point }}</button>
           </div>
-          <div v-if="vote !== null" class="mt-2">You voted: <strong>{{ vote }}</strong></div>
         </div>
         <!-- Distribution Bar -->
         <div v-if="results" class="mt-8">
@@ -112,6 +140,28 @@ const isOwner = ref(false);
 const joinError = ref('');
 const hasJoined = ref(false);
 const votingDuration = ref(10); // default 10 seconds
+const copyTooltip = ref('Copy');
+function copySessionCode() {
+  navigator.clipboard.writeText(code).then(() => {
+    copyTooltip.value = 'Copied!';
+    setTimeout(() => (copyTooltip.value = 'Copy'), 1200);
+  });
+}
+const shareTooltip = ref('Share');
+function shareSession() {
+  const url = window.location.origin + `/session/${code}`;
+  if (navigator.share) {
+    navigator.share({ title: 'Join Agile Voting Session', url }).then(() => {
+      shareTooltip.value = 'Shared!';
+      setTimeout(() => (shareTooltip.value = 'Share'), 1200);
+    }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      shareTooltip.value = 'Link copied!';
+      setTimeout(() => (shareTooltip.value = 'Share'), 1200);
+    });
+  }
+}
 
 onMessage((msg) => {
   if (msg.type === 'members') {
@@ -360,6 +410,15 @@ function segmentFlexStyle(count, idx) {
   background: #181c24;
   color: #60a5fa;
   border: 1px solid #2563eb;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+}
+.btn-voted {
+  background: #2563eb !important;
+  color: #fff !important;
+  border: 2px solid #60a5fa !important;
+  font-weight: bold;
+  box-shadow: 0 0 0 2px #60a5fa33;
+  z-index: 1;
 }
 .btn-sm {
   padding: 0.25rem 0.75rem;
@@ -477,11 +536,6 @@ function segmentFlexStyle(count, idx) {
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
-.voting-timer-label {
-  font-weight: 500;
-  color: #f3f4f6;
-  margin-right: 0.25rem;
-}
 .voting-timer-custom-group {
   display: flex;
   flex-direction: row;
@@ -501,7 +555,17 @@ function segmentFlexStyle(count, idx) {
   font-size: 1rem;
   height: 2.5rem;
   outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
+  user-select: none;
+}
+.voting-timer-s {
+  font-size: 0.95em;
+  color: #a1a1aa;
+  margin-left: 2px;
+  font-weight: 500;
 }
 .voting-timer-incdec {
   width: 2.2rem;
@@ -527,5 +591,103 @@ function segmentFlexStyle(count, idx) {
   margin-left: 0.25rem;
   display: flex;
   align-items: center;
+}
+.session-code-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+}
+.copy-btn-group {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.copy-btn {
+  background: none;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  padding: 0.45rem 0.55rem;
+  border-radius: 7px;
+  transition: background 0.15s, box-shadow 0.15s, border 0.15s;
+  display: flex;
+  align-items: center;
+  margin-left: 0.12rem;
+  font-size: 1.7rem;
+  box-shadow: none;
+}
+.copy-btn:hover, .copy-btn:focus {
+  background: #23283a;
+  box-shadow: none;
+  border: none;
+}
+.copy-feedback-popup {
+  color: #60a5fa;
+  font-size: 0.95rem;
+  text-align: left;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  position: absolute;
+  left: 110%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #181c24;
+  padding: 0.18rem 0.6rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  z-index: 10;
+  white-space: nowrap;
+}
+.share-btn-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: 0.2rem;
+}
+.share-btn {
+  background: none;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  padding: 0.45rem 0.55rem;
+  border-radius: 7px;
+  transition: background 0.15s, box-shadow 0.15s, border 0.15s;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  font-size: 1.7rem;
+  box-shadow: none;
+}
+.share-btn:hover, .share-btn:focus {
+  background: #23283a;
+  box-shadow: none;
+  border: none;
+}
+.share-feedback {
+  color: #60a5fa;
+  font-size: 0.95rem;
+  margin-top: 0.2rem;
+  text-align: right;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  position: absolute;
+  right: 0.5rem;
+  top: 2.2rem;
+  background: #181c24;
+  padding: 0.18rem 0.6rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  z-index: 10;
+  white-space: nowrap;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style> 
