@@ -53,6 +53,10 @@
           <div class="timer-card">⏳ {{ voting.seconds }}s</div>
         </div>
         <div v-if="!voting.active && isOwner" class="mb-6">
+          <div class="mb-2" style="text-align:center;">
+            <label for="votingDuration" style="font-weight:500;">Voting Timer (seconds):</label>
+            <input id="votingDuration" type="number" min="5" max="120" v-model.number="votingDuration" style="width:80px; margin-left:0.5rem; background:#181c24; color:#f3f4f6; border:1px solid #374151; border-radius:4px; padding:0.25rem 0.5rem; text-align:center;" />
+          </div>
           <button class="btn btn-primary" @click="startVoting">Start Voting</button>
         </div>
         <div v-if="voting.active" class="mb-6">
@@ -103,6 +107,7 @@ const points = [1, 2, 3, 5, 8, 13, 21, '?'];
 const isOwner = ref(false);
 const joinError = ref('');
 const hasJoined = ref(false);
+const votingDuration = ref(10); // default 10 seconds
 
 onMessage((msg) => {
   if (msg.type === 'members') {
@@ -152,7 +157,7 @@ function submitName() {
     router.replace({ query: { name: nameInput.value.trim() } });
   }
 }
-function startVoting() { send({ type: 'start-voting' }); }
+function startVoting() { send({ type: 'start-voting', duration: votingDuration.value }); }
 function submitVote(point) {
   if (voting.value.active) {
     vote.value = point;

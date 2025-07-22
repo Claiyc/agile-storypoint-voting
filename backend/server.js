@@ -130,12 +130,18 @@ wss.on('connection', (ws) => {
             return;
           }
 
-          // Start voting
-          sessionVoting[code] = { active: true, timer: null, seconds: 10 };
-          sessionVotes[code] = {};
-          broadcastVotingState(code, { active: true, seconds: 10 });
+          // Use custom duration if provided and valid, else default to 10
+          let duration = 10;
+          if (typeof data.duration === 'number' && data.duration >= 5 && data.duration <= 120) {
+            duration = Math.floor(data.duration);
+          }
 
-          // Start timer with 10s and broadcast every second
+          // Start voting
+          sessionVoting[code] = { active: true, timer: null, seconds: duration };
+          sessionVotes[code] = {};
+          broadcastVotingState(code, { active: true, seconds: duration });
+
+          // Start timer with custom duration and broadcast every second
           sessionVoting[code].timer = setInterval(() => {
             if (!sessionVoting[code]) return;
             sessionVoting[code].seconds--;
@@ -150,7 +156,7 @@ wss.on('connection', (ws) => {
           }, 1000);
 
           // Log
-          console.log(`[VOTING STARTED] Session: ${code}`);
+          console.log(`[VOTING STARTED] Session: ${code}, Duration: ${duration}s`);
           break;
         }
         case 'submit-vote': {
