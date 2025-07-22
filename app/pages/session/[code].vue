@@ -1,16 +1,20 @@
 <template>
   <div class="container">
     <div class="card">
-      <div class="header">
-        <div class="title-box">
-          <h2 v-if="!editingTitle" class="text-center">{{ title }}</h2>
-          <div v-else class="edit-title-row">
+      <div class="session-title-box">
+        <template v-if="!editingTitle">
+          <h2 class="session-title">{{ title }}</h2>
+        </template>
+        <template v-else>
+          <div class="edit-title-row">
             <input v-model="titleInput" class="title-input" />
             <button class="btn btn-primary btn-sm" @click="saveTitle">Save</button>
             <button class="btn btn-secondary btn-sm" @click="cancelEdit">Cancel</button>
           </div>
-        </div>
-        <button v-if="isOwner && !editingTitle" class="btn btn-secondary btn-sm ml-2 edit-title-btn" @click="editTitle">Edit Title</button>
+        </template>
+      </div>
+      <div v-if="isOwner && !editingTitle" class="edit-title-btn-row">
+        <button class="btn btn-secondary btn-sm" @click="editTitle">Edit Title</button>
       </div>
       <div class="mb-4 text-center">
         <strong>Session Code:</strong> <span class="session-code">{{ code }}</span>
@@ -237,37 +241,35 @@ function segmentFlexStyle(count, idx) {
   flex-direction: column;
   align-items: stretch;
 }
-.header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1rem;
-  width: 100%;
-}
-.title-box {
-  width: 100%;
-  box-sizing: border-box;
-  background: rgba(35,40,58,0.85);
-  border-radius: 10px;
-  margin: 0 2rem 1rem 2rem;
+.session-title-box {
+  background: rgba(20,22,30,0.98);
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  padding: 0.5rem 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 1rem 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
-.header h2.text-center {
+.session-title {
   color: #60a5fa;
   text-align: center;
   margin: 0;
-  background: none;
-  width: 100%;
+  font-size: 1.5rem;
+  font-weight: bold;
   word-break: break-word;
+  background: none;
 }
 .edit-title-row {
   display: flex;
+  flex-direction: row;
   gap: 0.5rem;
+  justify-content: center;
   align-items: center;
+}
+.edit-title-btn-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
 }
 .title-input {
   padding: 0.5rem;
@@ -452,8 +454,5 @@ function segmentFlexStyle(count, idx) {
 }
 .btn-left {
   margin-left: auto;
-}
-.edit-title-btn {
-  margin: 0 2rem 0 2rem;
 }
 </style> 
