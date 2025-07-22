@@ -54,6 +54,12 @@ wss.on('connection', (ws) => {
 
           // Send title after registration
           ws.send(JSON.stringify({ type: 'session-title', title: data.title }));
+          // Send owner to all clients
+          for (const client of sessions[code]) {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({ type: 'owner', owner: data.userName }));
+            }
+          }
           console.log(`[SEND TITLE TO CREATOR] Session: ${code}, Title: ${data.title}, To: ${data.userName}`);
           broadcastTitle(code, data.title);
 
@@ -97,6 +103,13 @@ wss.on('connection', (ws) => {
 
           ws.send(JSON.stringify({ type: 'session-joined', code }));
           ws.send(JSON.stringify({ type: 'members', members: Array.from(sessionMembers[code]) }));
+          // Send owner to all clients
+          const owner = await redisClient.hGet(`session:${code}`, 'owner');
+          for (const client of sessions[code]) {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({ type: 'owner', owner }));
+            }
+          }
           console.log(`[SEND MEMBERS TO JOINER] Session: ${code}, Members: ${Array.from(sessionMembers[code]).join(', ')}, To: ${data.userName}`);
           broadcastMembers(code);
           // Always send the current title to the joiner
@@ -171,6 +184,35 @@ wss.on('connection', (ws) => {
           ws.send(JSON.stringify({ type: 'vote-received' }));
           // Log
           console.log(`[VOTE] User: ${ws.userName}, Session: ${code}, Point: ${data.point}`);
+          break;
+        }
+        case 'get-owner': {
+          const code = data.code;
+          if (!code) return;
+          const owner = await redisClient.hGet(`session:${code}`, 'owner');
+          ws.send(JSON.stringify({ type: 'owner', owner }));
+          break;
+        }
+        case 'promote-member': {
+          const code = ws.sessionCode;
+          if (!code || ws.userName !== (await redisClient.hGet(`session:${code}`, 'owner'))) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Only the session owner can promote another member.' }));
+            return;
+          }
+          const target = data.userName;
+          if (!sessionMembers[code] || !sessionMembers[code].has(target)) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Target member not found.' }));
+            return;
+          }
+          await redisClient.hSet(`session:${code}`, 'owner', target);
+          broadcastMembers(code);
+          // Broadcast new owner to all clients
+          for (const client of sessions[code]) {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({ type: 'owner', owner: target }));
+            }
+          }
+          console.log(`[OWNER PROMOTED] Session: ${code}, New Owner: ${target}`);
           break;
         }
         // Add more message types for voting, timer, etc.

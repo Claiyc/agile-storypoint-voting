@@ -89,7 +89,7 @@
               <tr v-for="row in memberRows" :key="row.name">
                 <td>
                   {{ row.name }}
-                  <span v-if="members.length && row.name === members[0]" title="Session creator" style="margin-left:4px; vertical-align:middle; display:inline-block; position:relative; top:-2px;">
+                  <span v-if="row.name === ownerName" title="Session owner" style="margin-left:4px; vertical-align:middle; display:inline-block; position:relative; top:-2px;">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
                       <path d="M3 7l3.5 5 3.5-7 3.5 7L17 7" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                       <circle cx="3" cy="7" r="1" fill="#fbbf24"/>
@@ -98,6 +98,11 @@
                       <rect x="6" y="13" width="8" height="2" rx="1" fill="#fbbf24"/>
                     </svg>
                   </span>
+                  <button v-if="isOwner && row.name !== name" class="promote-btn" @click="promoteMember(row.name)" title="Promote to owner" aria-label="Promote to owner">
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 15V5M10 5l-3 3M10 5l3 3" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
                 </td>
                 <td>
                   {{ row.vote }}
@@ -189,6 +194,7 @@ const vote = ref(null);
 const results = ref(null);
 const points = [1, 2, 3, 5, 8, 13, 21, '?'];
 const isOwner = ref(false);
+const ownerName = ref("");
 const joinError = ref('');
 const hasJoined = ref(false);
 const votingDuration = ref(10); // default 10 seconds
@@ -221,9 +227,11 @@ let lastVotingStart = 0;
 onMessage((msg) => {
   if (msg.type === 'members') {
     members.value = msg.members;
-    if (members.value.length && name.value) {
-      isOwner.value = (members.value[0] === name.value);
+    // After joining, request the current owner
+    if (name.value && members.value.includes(name.value)) {
+      send({ type: 'get-owner', code });
     }
+    // ownerName will be updated by a separate message
   } else if (msg.type === 'voting-state') {
     // Play pling sound when voting starts
     if (msg.active && (!voting.value.active || voting.value.seconds === 0)) {
@@ -249,7 +257,14 @@ onMessage((msg) => {
     joinError.value = msg.message;
     router.replace({ query: {} });
     name.value = '';
+  } else if (msg.type === 'owner') {
+    ownerName.value = msg.owner;
   }
+});
+
+// Watch for owner changes and update isOwner
+watch([ownerName, name], ([o, n]) => {
+  isOwner.value = o === n;
 });
 
 function tryJoinSession() {
@@ -258,7 +273,10 @@ function tryJoinSession() {
     hasJoined.value = true;
   }
 }
-onMounted(() => { tryJoinSession(); });
+onMounted(() => {
+  tryJoinSession();
+  // send({ type: 'get-owner', code }); // Remove from here
+});
 watch(() => route.query.name, (newName) => {
   name.value = newName ? String(newName) : '';
   hasJoined.value = false;
@@ -267,6 +285,7 @@ watch(() => route.query.name, (newName) => {
 watch(isConnected, (val) => {
   if (val) {
     tryJoinSession();
+    // send({ type: 'get-owner', code }); // Remove from here
   }
 });
 function submitName() {
@@ -312,6 +331,10 @@ function stopHoldTimer(type, event) {
       if (type === 'dec') decrementTimer(true);
     }
   }
+}
+
+function promoteMember(targetName) {
+  send({ type: 'promote-member', userName: targetName });
 }
 
 const memberRows = computed(() => {
@@ -833,5 +856,19 @@ function segmentFlexStyle(count, idx) {
   box-shadow: 0 1px 2px rgba(20,22,30,0.98);
   z-index: 10;
   white-space: nowrap;
+}
+.promote-btn {
+  background: none;
+  border: none;
+  padding: 0 0 0 4px;
+  cursor: pointer;
+  vertical-align: middle;
+  outline: none;
+  transition: box-shadow 0.15s;
+}
+.promote-btn:hover, .promote-btn:focus {
+  box-shadow: 0 0 4px #23283a;
+  background: #181c24;
+  border-radius: 4px;
 }
 </style> 
