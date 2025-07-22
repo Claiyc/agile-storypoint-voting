@@ -1,7 +1,19 @@
 <template>
   <div class="container">
     <div class="card">
-      <div class="share-btn-row">
+      <div class="mb-4 text-center session-code-row">
+        <div class="session-code-left">
+          <strong>Session Code:</strong> <span class="session-code">{{ code }}</span>
+          <span class="copy-btn-group">
+            <button class="copy-btn" @click="copySessionCode" :title="copyTooltip" aria-label="Copy session code">
+              <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="5" y="5" width="8" height="8" rx="2" stroke="#60a5fa" stroke-width="1.5"/>
+                <rect x="3" y="3" width="8" height="8" rx="2" stroke="#60a5fa" stroke-width="1.5"/>
+              </svg>
+            </button>
+            <transition name="fade"><div v-if="copyTooltip === 'Copied!'" class="copy-feedback-popup">Copied!</div></transition>
+          </span>
+        </div>
         <button class="share-btn" @click="shareSession" :title="shareTooltip" aria-label="Share session">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="18" cy="19" r="2" stroke="#60a5fa" stroke-width="1.5"/>
@@ -13,38 +25,53 @@
         </button>
         <transition name="fade"><div v-if="shareTooltip === 'Shared!' || shareTooltip === 'Link copied!'" class="share-feedback">{{ shareTooltip }}</div></transition>
       </div>
-      <div class="session-title-box">
-        <template v-if="!editingTitle">
-          <h2 class="session-title">{{ title }}</h2>
-        </template>
-        <template v-else>
-          <div class="edit-title-row">
-            <input v-model="titleInput" class="title-input" />
-            <button class="btn btn-primary btn-sm" @click="saveTitle">Save</button>
-            <button class="btn btn-secondary btn-sm" @click="cancelEdit">Cancel</button>
-          </div>
-        </template>
-      </div>
-      <div v-if="isOwner && !editingTitle" class="edit-title-btn-row">
-        <button class="btn btn-secondary btn-sm" @click="editTitle">Edit Title</button>
-      </div>
-      <div class="mb-4 text-center session-code-row">
-        <strong>Session Code:</strong> <span class="session-code">{{ code }}</span>
-        <span class="copy-btn-group">
-          <button class="copy-btn" @click="copySessionCode" :title="copyTooltip" aria-label="Copy session code">
-            <svg width="28" height="28" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="5" y="5" width="8" height="8" rx="2" stroke="#60a5fa" stroke-width="1.5"/>
-              <rect x="3" y="3" width="8" height="8" rx="2" stroke="#60a5fa" stroke-width="1.5"/>
-            </svg>
-          </button>
-          <transition name="fade"><div v-if="copyTooltip === 'Copied!'" class="copy-feedback-popup">Copied!</div></transition>
-        </span>
+      <div v-if="name && name !== ''">
+        <div class="session-title-box">
+          <template v-if="!editingTitle">
+            <div class="session-title-row">
+              <button
+                v-if="isOwner && !editingTitle"
+                class="edit-title-icon-btn"
+                @click="editTitle"
+                :title="'Edit session title'"
+                aria-label="Edit session title"
+              >
+                <svg width="28" height="28" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 13.5V16h2.5l7.1-7.1a1 1 0 0 0 0-1.4l-1.1-1.1a1 1 0 0 0-1.4 0L4 13.5z" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12.5 6.5l1.1 1.1" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <h2 class="session-title">{{ title }}</h2>
+              <a
+                v-if="title && title.trim()"
+                class="goto-jira-btn"
+                :href="`https://jira.frequentis.com/browse/${encodeURIComponent(title)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                :title="`Go to Jira: ${title}`"
+                aria-label="Go to Jira"
+              >
+                <svg width="28" height="28" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 13L13 7M9 7H13V11" stroke="#60a5fa" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  <rect x="3.5" y="3.5" width="13" height="13" rx="2.5" stroke="#60a5fa" stroke-width="1.7"/>
+                </svg>
+              </a>
+            </div>
+          </template>
+          <template v-else>
+            <div class="edit-title-row">
+              <input v-model="titleInput" class="title-input" />
+              <button class="btn btn-primary btn-sm" @click="saveTitle">Save</button>
+              <button class="btn btn-secondary btn-sm" @click="cancelEdit">Cancel</button>
+            </div>
+          </template>
+        </div>
       </div>
       <div v-if="!name || name === ''">
         <form @submit.prevent="submitName" class="space-y-4">
           <div class="form-group">
             <label for="nameInput" class="inline-label">Your Name</label>
-            <input id="nameInput" v-model="nameInput" required placeholder="e.g. Alice" class="inline-input" />
+            <input id="nameInput" v-model="nameInput" required placeholder="e.g. Alice" class="inline-input join-name-input" />
           </div>
           <button type="submit" class="btn btn-primary btn-left">Join</button>
         </form>
@@ -348,15 +375,18 @@ function segmentFlexStyle(count, idx) {
   padding: 1rem 0;
   margin-bottom: 1.5rem;
   text-align: center;
+  position: relative;
 }
 .session-title {
+  margin: 0 auto;
   color: #60a5fa;
   text-align: center;
-  margin: 0;
   font-size: 1.5rem;
   font-weight: bold;
   word-break: break-word;
   background: none;
+  position: relative;
+  z-index: 1;
 }
 .edit-title-row {
   display: flex;
@@ -631,59 +661,16 @@ function segmentFlexStyle(count, idx) {
 .session-code-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 0.5rem;
   position: relative;
 }
-.copy-btn-group {
-  display: inline-flex;
-  align-items: center;
-  position: relative;
-}
-.copy-btn {
-  background: none;
-  border: none;
-  color: #60a5fa;
-  cursor: pointer;
-  padding: 0.45rem 0.55rem;
-  border-radius: 7px;
-  transition: background 0.15s, box-shadow 0.15s, border 0.15s;
+.session-code-left {
   display: flex;
   align-items: center;
-  margin-left: 0.12rem;
-  font-size: 1.7rem;
-  box-shadow: none;
+  gap: 0.5rem;
 }
-.copy-btn:hover, .copy-btn:focus {
-  background: #23283a;
-  box-shadow: none;
-  border: none;
-}
-.copy-feedback-popup {
-  color: #60a5fa;
-  font-size: 0.95rem;
-  text-align: left;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  position: absolute;
-  left: 110%;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #181c24;
-  padding: 0.18rem 0.6rem;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  z-index: 10;
-  white-space: nowrap;
-}
-.share-btn-row {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  position: relative;
-  margin-bottom: 0.2rem;
-}
+.share-btn-row { display: none; }
 .share-btn {
   background: none;
   border: none;
@@ -700,7 +687,7 @@ function segmentFlexStyle(count, idx) {
 }
 .share-btn:hover, .share-btn:focus {
   background: #23283a;
-  box-shadow: none;
+  box-shadow: 0 1px 2px rgba(20,22,30,0.98);
   border: none;
 }
 .share-feedback {
@@ -725,5 +712,103 @@ function segmentFlexStyle(count, idx) {
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
+}
+.session-title-row {
+  display: flex;
+  align-items: center;
+  position: relative;
+  min-height: 2.5rem;
+}
+.goto-jira-btn {
+  position: absolute;
+  right: 0.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  padding: 0.22rem 0.28rem;
+  border-radius: 7px;
+  transition: background 0.15s;
+  font-size: 1.25rem;
+  text-decoration: none;
+  z-index: 2;
+}
+.goto-jira-btn:hover, .goto-jira-btn:focus {
+  background: #23283a;
+  box-shadow: 0 1px 2px rgba(10,12,18,0.48);
+}
+.edit-title-icon-btn {
+  position: absolute;
+  left: 0.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  padding: 0.32rem 0.38rem;
+  border-radius: 7px;
+  transition: background 0.15s, box-shadow 0.15s, border 0.15s;
+  display: flex;
+  align-items: center;
+  font-size: 1.55rem;
+  margin-left: 0;
+  z-index: 3;
+}
+.edit-title-icon-btn:hover, .edit-title-icon-btn:focus {
+  background: #23283a;
+  box-shadow: 0 1px 2px rgba(20,22,30,0.98);
+}
+.join-name-input {
+  box-sizing: border-box;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.copy-btn-group {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.copy-btn {
+  background: none !important;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  padding: 0.45rem 0.55rem;
+  border-radius: 7px;
+  transition: background 0.15s, box-shadow 0.15s, border 0.15s;
+  display: flex;
+  align-items: center;
+  margin-left: 0.12rem;
+  font-size: 1.7rem;
+  box-shadow: none;
+  vertical-align: middle;
+}
+.copy-btn:hover, .copy-btn:focus {
+  background: #23283a !important;
+  box-shadow: 0 1px 2px rgba(20,22,30,0.98);
+  border: none;
+}
+.copy-feedback-popup {
+  color: #60a5fa;
+  font-size: 0.95rem;
+  text-align: right;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  position: absolute;
+  left: 110%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #181c24;
+  padding: 0.18rem 0.6rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(20,22,30,0.98);
+  z-index: 10;
+  white-space: nowrap;
 }
 </style> 
