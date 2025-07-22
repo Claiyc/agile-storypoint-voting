@@ -76,11 +76,25 @@
         <div v-if="!voting.active && isOwner" class="mb-6">
           <div class="voting-timer-row">
             <div class="voting-timer-custom-group">
-              <button class="voting-timer-incdec" @click="decrementTimer" aria-label="Decrease timer" tabindex="0">&#8722;</button>
+              <button class="voting-timer-incdec"
+                @mousedown="startHoldTimer('dec')"
+                @touchstart.prevent="startHoldTimer('dec')"
+                @mouseup="stopHoldTimer('dec', $event)"
+                @mouseleave="stopHoldTimer()"
+                @touchend="stopHoldTimer('dec', $event)"
+                aria-label="Decrease timer"
+                tabindex="0">&#8722;</button>
               <span class="voting-timer-input-custom">
                 {{ votingDuration }}<span class="voting-timer-s">s</span>
               </span>
-              <button class="voting-timer-incdec" @click="incrementTimer" aria-label="Increase timer" tabindex="0">&#43;</button>
+              <button class="voting-timer-incdec"
+                @mousedown="startHoldTimer('inc')"
+                @touchstart.prevent="startHoldTimer('inc')"
+                @mouseup="stopHoldTimer('inc', $event)"
+                @mouseleave="stopHoldTimer()"
+                @touchend="stopHoldTimer('inc', $event)"
+                aria-label="Increase timer"
+                tabindex="0">&#43;</button>
             </div>
             <button class="btn btn-primary voting-timer-btn" @click="startVoting">Start Voting</button>
           </div>
@@ -221,11 +235,33 @@ function submitVote(point) {
 function editTitle() { editingTitle.value = true; titleInput.value = title.value; }
 function cancelEdit() { editingTitle.value = false; titleInput.value = title.value; }
 function saveTitle() { send({ type: 'update-title', title: titleInput.value }); editingTitle.value = false; }
-function incrementTimer() {
+let timerInterval = null;
+let timerHeld = false;
+
+function incrementTimer(once = false) {
   if (votingDuration.value < 120) votingDuration.value++;
 }
-function decrementTimer() {
+function decrementTimer(once = false) {
   if (votingDuration.value > 5) votingDuration.value--;
+}
+function startHoldTimer(type) {
+  timerHeld = true;
+  timerInterval = setInterval(() => {
+    if (!timerHeld) return;
+    if (type === 'inc') incrementTimer();
+    if (type === 'dec') decrementTimer();
+  }, 90);
+}
+function stopHoldTimer(type, event) {
+  if (timerHeld) {
+    timerHeld = false;
+    if (timerInterval) clearInterval(timerInterval);
+    // If this was a quick click (not a hold), do a single increment/decrement
+    if (event && event.type === 'mouseup' || event.type === 'touchend') {
+      if (type === 'inc') incrementTimer(true);
+      if (type === 'dec') decrementTimer(true);
+    }
+  }
 }
 
 const memberRows = computed(() => {

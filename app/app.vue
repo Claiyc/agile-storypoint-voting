@@ -60,7 +60,7 @@ body {
 .header {
   z-index: 100;
   width: 100%;
-  padding: 1.5rem 1rem 0.5rem 1rem;
+  padding: 1.5rem 1rem 1.2rem 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
