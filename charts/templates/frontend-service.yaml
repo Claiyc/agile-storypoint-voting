@@ -8,7 +8,7 @@ spec:
   type: {{ .Values.frontend.service.type }}
   ports:
     - port: {{ .Values.frontend.service.port }}
-      targetPort: 3000
+      targetPort: 80
       protocol: TCP
       name: frontend
   selector:
