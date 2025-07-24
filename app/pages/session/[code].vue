@@ -11,7 +11,7 @@
                 <rect x="3" y="3" width="8" height="8" rx="2" stroke="#60a5fa" stroke-width="1.5"/>
               </svg>
             </button>
-            <transition name="fade"><div v-if="copyTooltip === 'Copied!'" class="copy-feedback-popup">Copied!</div></transition>
+            <transition name="fade"><div v-if="copyTooltip === 'Copied!' || copyTooltip === 'Failed!'" class="copy-feedback-popup">{{ copyTooltip }}</div></transition>
           </span>
         </div>
         <button class="share-btn" @click="shareSession" :title="shareTooltip" aria-label="Share session">
@@ -23,7 +23,7 @@
             <line x1="16.3" y1="6.2" x2="7.7" y2="10.8" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </button>
-        <transition name="fade"><div v-if="shareTooltip === 'Shared!' || shareTooltip === 'Link copied!'" class="share-feedback">{{ shareTooltip }}</div></transition>
+        <transition name="fade"><div v-if="shareTooltip === 'Shared!' || shareTooltip === 'Link copied!' || shareTooltip === 'Failed!'" class="share-feedback">{{ shareTooltip }}</div></transition>
       </div>
       <div v-if="name && name !== ''">
         <div class="session-title-box">
@@ -200,6 +200,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { ref, computed, onMounted, watch } from 'vue';
 import { useWebSocket } from '../../composables/useWebSocket';
 import { useRuntimeConfig } from '#app';
+const config = useRuntimeConfig();
+const gotoBaseUrl = config.public.gotoBaseUrl;
 const route = useRoute();
 const router = useRouter();
 const code = route.params.code;
@@ -221,25 +223,85 @@ const hasJoined = ref(false);
 const votingDuration = ref(10); // default 10 seconds
 const copyTooltip = ref('Copy');
 function copySessionCode() {
-  navigator.clipboard.writeText(code).then(() => {
-    copyTooltip.value = 'Copied!';
-    setTimeout(() => (copyTooltip.value = 'Copy'), 1200);
-  });
+  const doCopy = (text) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    } else {
+      // Fallback for older browsers
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        return Promise.reject(err);
+      } finally {
+        document.body.removeChild(textarea);
+      }
+      return Promise.resolve();
+    }
+  };
+  doCopy(code)
+    .then(() => {
+      copyTooltip.value = 'Copied!';
+      setTimeout(() => (copyTooltip.value = 'Copy'), 1200);
+    })
+    .catch(() => {
+      copyTooltip.value = 'Failed!';
+      setTimeout(() => (copyTooltip.value = 'Copy'), 1200);
+    });
 }
+
 const shareTooltip = ref('Share');
 function shareSession() {
   const url = window.location.origin + `/session/${code}`;
   if (navigator.share) {
-    navigator.share({ title: 'Join Agile Voting Session', url }).then(() => {
-      shareTooltip.value = 'Shared!';
-      setTimeout(() => (shareTooltip.value = 'Share'), 1200);
-    }).catch(() => {});
+    navigator.share({ title: 'Join Agile Voting Session', url })
+      .then(() => {
+        shareTooltip.value = 'Shared!';
+        setTimeout(() => (shareTooltip.value = 'Share'), 1200);
+      })
+      .catch(() => {
+        // fallback to copy if share fails
+        copySessionLink(url);
+      });
   } else {
-    navigator.clipboard.writeText(url).then(() => {
+    copySessionLink(url);
+  }
+}
+function copySessionLink(url) {
+  const doCopy = (text) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        return Promise.reject(err);
+      } finally {
+        document.body.removeChild(textarea);
+      }
+      return Promise.resolve();
+    }
+  };
+  doCopy(url)
+    .then(() => {
       shareTooltip.value = 'Link copied!';
       setTimeout(() => (shareTooltip.value = 'Share'), 1200);
+    })
+    .catch(() => {
+      shareTooltip.value = 'Failed!';
+      setTimeout(() => (shareTooltip.value = 'Share'), 1200);
     });
-  }
 }
 
 const plingAudio = ref(null);
