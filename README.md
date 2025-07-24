@@ -1,3 +1,6 @@
+<img width="1175" height="872" alt="image" src="https://github.com/user-attachments/assets/06536e1c-90c1-4725-a5e6-777b0c3d71cc" />
+
+
 # 🚀 Agile Story Point Voting App
 
 > **Fully vibe coded – blame the AI, not me.**
