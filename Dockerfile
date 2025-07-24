@@ -1,24 +1,20 @@
-# Production-ready multi-stage Dockerfile for Nuxt 3 app
+# Production-ready Dockerfile for static Nuxt 3 site
 
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY . .
-RUN npm install --frozen-lockfile && npm run build
+RUN npm install --frozen-lockfile && npx nuxi generate
 
 # Production stage (Nginx)
 FROM nginx:alpine AS runner
 WORKDIR /app
 
-# Copy built files from builder
-COPY --from=builder /app/.output/public /usr/share/nginx/html
-COPY --from=builder /app/.output /app/.output
+# Copy generated static files to Nginx html directory
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx config (if exists)
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Expose port 3000 for compatibility (can be changed)
-EXPOSE 3000
+# Expose port 80 (default for Nginx)
+EXPOSE 80
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"] 

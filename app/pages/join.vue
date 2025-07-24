@@ -19,6 +19,7 @@
 </template>
 
 <script setup>
+definePageMeta({ prerender: false })
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useWebSocket } from '../composables/useWebSocket';

@@ -9,4 +9,9 @@ export default defineNuxtConfig({
       gotoBaseUrl: process.env.NUXT_PUBLIC_GOTO_BASE_URL || 'https://www.google.com/search?q=',
     },
   },
+  nitro: {
+    prerender: {
+      ignore: ['/join', '/create'],
+    },
+  },
 });

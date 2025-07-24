@@ -11,5 +11,8 @@ spec:
       targetPort: 3001
       protocol: TCP
       name: backend
+{{- if and (eq .Values.backend.service.type "NodePort") .Values.backend.service.nodePort }}
+      nodePort: {{ .Values.backend.service.nodePort }}
+{{- end }}
   selector:
     app: {{ include "agile-app.fullname" . }}-backend 

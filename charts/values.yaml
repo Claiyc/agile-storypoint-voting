@@ -32,6 +32,7 @@ backend:
   service:
     type: ClusterIP
     port: 3001
+    # nodePort: 32001  # Optional: only used if type is NodePort
   env:
     REDIS_HOST: redis
     REDIS_PORT: 6379
