@@ -8,7 +8,7 @@ frontend:
   replicaCount: 1
   service:
     type: ClusterIP
-    port: 3000
+    port: 80
   env:
     NUXT_PUBLIC_WS_URL: ws://localhost:3001  # Default WebSocket URL for Nuxt runtimeConfig
     NUXT_PUBLIC_GOTO_BASE_URL: https://www.google.com/search?q=  # Default for the "Go to" button
@@ -31,12 +31,12 @@ backend:
   replicaCount: 1
   service:
     type: ClusterIP
-    port: 3001
+    port: 3000
     # nodePort: 32001  # Optional: only used if type is NodePort
   env:
     REDIS_HOST: redis
     REDIS_PORT: 6379
-    PORT: 3001
+    PORT: 3000
     # REDIS_PASSWORD: ""
     # OLLAMA_URL: "http://ollama:11434" # If using internal Ollama
   resources: {}
