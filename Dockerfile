@@ -15,8 +15,5 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Expose port 80 (default for Nginx)
 EXPOSE 80
-
-COPY nginx.conf /etc/nginx/nginx.conf
-
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"] 
