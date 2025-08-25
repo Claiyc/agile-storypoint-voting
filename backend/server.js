@@ -117,6 +117,18 @@ wss.on('connection', (ws) => {
           ws.send(JSON.stringify({ type: 'session-title', title }));
           console.log(`[SEND TITLE TO JOINER] Session: ${code}, Title: ${title}, To: ${data.userName}`);
           broadcastTitle(code, title);
+          
+          // Send current voting state and existing votes to new joiner if voting is active
+          if (sessionVoting[code]?.active) {
+            ws.send(JSON.stringify({ type: 'voting-state', active: true, seconds: sessionVoting[code].seconds }));
+            // Send all existing votes to the new joiner
+            if (sessionVotes[code] && Object.keys(sessionVotes[code]).length > 0) {
+              for (const [userName, vote] of Object.entries(sessionVotes[code])) {
+                ws.send(JSON.stringify({ type: 'voted', userName }));
+              }
+            }
+          }
+          
           // Log user joining
           console.log(`[USER JOINED] User: ${data.userName} joined session: ${code}`);
           break;
