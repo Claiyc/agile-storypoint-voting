@@ -2,16 +2,16 @@
   <div class="container">
     <div class="card">
       <h2 class="text-center">Create a New Voting Session</h2>
-      <form @submit.prevent="createSession" class="space-y-4">
+      <form @submit.prevent="handleFormSubmit" class="space-y-4">
         <div class="form-group">
           <label for="title">Session Title</label>
-          <input id="title" v-model="title" required placeholder="e.g. Sprint Planning" />
+          <input id="title" v-model="title" :required="!sessionCode" placeholder="e.g. Sprint Planning" />
         </div>
         <div class="form-group">
           <label for="name">Your Name</label>
-          <input id="name" v-model="name" required placeholder="e.g. Alice" />
+          <input id="name" v-model="name" :required="!sessionCode" placeholder="e.g. Alice" />
         </div>
-        <button type="submit" class="btn btn-primary">Create Session</button>
+        <button v-if="!sessionCode" type="submit" class="btn btn-primary">Create Session</button>
       </form>
       <div v-if="sessionCode" class="mt-6 text-center">
         <strong>Session Code:</strong> {{ sessionCode }}<br />
@@ -25,7 +25,7 @@
 
 <script setup>
 definePageMeta({ prerender: false })
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useWebSocket } from '../composables/useWebSocket';
 
@@ -51,6 +51,14 @@ onMessage((msg) => {
   }
 });
 
+function handleFormSubmit() {
+  if (sessionCode.value) {
+    goToSession();
+  } else {
+    createSession();
+  }
+}
+
 function createSession() {
   if (!isConnected.value) {
     error.value = 'WebSocket not connected.';
@@ -66,6 +74,22 @@ function createSession() {
 function goToSession() {
   router.push({ path: `/session/${sessionCode.value}`, query: { name: name.value } });
 }
+
+onMounted(() => {
+  // Add class to main element for styling
+  const mainElement = document.querySelector('.main');
+  if (mainElement) {
+    mainElement.classList.add('create-page');
+  }
+});
+
+onUnmounted(() => {
+  // Remove class when leaving the page
+  const mainElement = document.querySelector('.main');
+  if (mainElement) {
+    mainElement.classList.remove('create-page');
+  }
+});
 </script>
 
 <style scoped>
@@ -74,11 +98,9 @@ function goToSession() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  min-width: 100vw;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
   box-sizing: border-box;
+  padding-top: 0;
 }
 .card {
   max-width: 400px;
@@ -89,6 +111,7 @@ function goToSession() {
   color: #f3f4f6;
   border-radius: 12px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  margin-top: 1rem;
 }
 .text-center { text-align: center; }
 .mt-6 { margin-top: 1.5rem; }

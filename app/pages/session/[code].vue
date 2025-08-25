@@ -220,7 +220,7 @@ const isOwner = ref(false);
 const ownerName = ref("");
 const joinError = ref('');
 const hasJoined = ref(false);
-const votingDuration = ref(10); // default 10 seconds
+const votingDuration = ref(30); // default 10 seconds
 const copyTooltip = ref('Copy');
 function copySessionCode() {
   const doCopy = (text) => {
@@ -315,8 +315,7 @@ onMessage((msg) => {
     if (name.value && members.value.includes(name.value)) {
       send({ type: 'get-owner', code });
     }
-    // Reset votedMembers when members list changes (new round)
-    votedMembers.value = new Set();
+    // Don't reset votedMembers when members list changes - this preserves voting progress
   } else if (msg.type === 'voting-state') {
     // Play pling sound when voting starts
     if (msg.active && (!voting.value.active || voting.value.seconds === 0)) {
@@ -369,6 +368,12 @@ onMounted(() => {
   // Preload pling sound
   if (plingAudio.value) {
     plingAudio.value.load();
+  }
+  
+  // Remove any page-specific classes from main element
+  const mainElement = document.querySelector('.main');
+  if (mainElement) {
+    mainElement.classList.remove('welcome-page', 'create-page', 'join-page');
   }
 });
 watch(() => route.query.name, (newName) => {
@@ -504,15 +509,15 @@ function segmentFlexStyle(count, idx) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  min-width: 100vw;
-  width: 100vw;
-  height: 100vh;
+  justify-content: flex-start;
+  width: 100%;
   box-sizing: border-box;
+  padding: 1rem 0;
+  min-height: auto;
+  max-width: 100%;
 }
 .card {
-  max-width: 600px;
+  max-width: 750px;
   width: 100%;
   margin: 0 auto;
   padding: 2rem;
@@ -523,6 +528,11 @@ function segmentFlexStyle(count, idx) {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .session-title-box {
   background: rgba(20,22,30,0.98);
@@ -585,11 +595,15 @@ function segmentFlexStyle(count, idx) {
   margin-top: 0.5rem;
   background: #23283a;
   color: #f3f4f6;
+  table-layout: fixed;
 }
 .table th, .table td {
   border: 1px solid #374151;
   padding: 0.5rem 0.75rem;
   text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 0;
 }
 .sticky-timer {
   display: flex;
@@ -1010,4 +1024,51 @@ function segmentFlexStyle(count, idx) {
 .vote-status-icon { display: inline-block; vertical-align: middle; margin-left: 2px; }
 .spinner { animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .card {
+    max-width: 95%;
+    padding: 1.5rem;
+    margin: 1rem 0.5rem;
+  }
+  
+  .container {
+    padding: 0.5rem 0;
+  }
+  
+  .table th, .table td {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .session-title {
+    font-size: 1.3rem;
+  }
+  
+  .title-input {
+    width: 70%;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    max-width: 98%;
+    padding: 1rem;
+    margin: 0.5rem 0.25rem;
+  }
+  
+  .table th, .table td {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.85rem;
+  }
+  
+  .session-title {
+    font-size: 1.2rem;
+  }
+  
+  .title-input {
+    width: 80%;
+  }
+}
 </style> 

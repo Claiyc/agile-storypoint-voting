@@ -20,7 +20,7 @@
 
 <script setup>
 definePageMeta({ prerender: false })
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useWebSocket } from '../composables/useWebSocket';
 
@@ -54,6 +54,22 @@ function joinSession() {
   }
   send({ type: 'join-session', code: code.value.toUpperCase(), userName: name.value });
 }
+
+onMounted(() => {
+  // Add class to main element for styling
+  const mainElement = document.querySelector('.main');
+  if (mainElement) {
+    mainElement.classList.add('join-page');
+  }
+});
+
+onUnmounted(() => {
+  // Remove class when leaving the page
+  const mainElement = document.querySelector('.main');
+  if (mainElement) {
+    mainElement.classList.remove('join-page');
+  }
+});
 </script>
 
 <style scoped>
@@ -61,12 +77,9 @@ function joinSession() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  min-width: 100vw;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
   box-sizing: border-box;
+  padding-top: 0;
 }
 .card {
   max-width: 400px;
@@ -77,6 +90,7 @@ function joinSession() {
   color: #f3f4f6;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  margin-top: 1rem;
 }
 .text-center { text-align: center; }
 .mt-4 { margin-top: 1rem; }

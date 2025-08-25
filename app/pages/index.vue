@@ -17,7 +17,25 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { onMounted, onUnmounted } from 'vue';
+
 const navigateTo = useRouter().push;
+
+onMounted(() => {
+  // Add class to main element for styling
+  const mainElement = document.querySelector('.main');
+  if (mainElement) {
+    mainElement.classList.add('welcome-page');
+  }
+});
+
+onUnmounted(() => {
+  // Remove class when leaving the page
+  const mainElement = document.querySelector('.main');
+  if (mainElement) {
+    mainElement.classList.remove('welcome-page');
+  }
+});
 </script>
 
 <style scoped>
@@ -26,11 +44,9 @@ const navigateTo = useRouter().push;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  min-width: 100vw;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
   box-sizing: border-box;
+  padding-top: 0;
 }
 .card {
   max-width: 400px;
@@ -41,6 +57,7 @@ const navigateTo = useRouter().push;
   color: #f3f4f6;
   border-radius: 12px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  margin-top: 1rem;
 }
 .text-center { text-align: center; }
 .mb-8 { margin-bottom: 2rem; }
