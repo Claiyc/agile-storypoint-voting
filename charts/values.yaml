@@ -1,5 +1,8 @@
 # Default values for agile-app Helm chart
 
+# uncomment if to be used
+# imagePullSecretName: mysecret
+
 frontend:
   image:
     repository: your-frontend-image
@@ -82,4 +85,4 @@ ollama:
 
 nodeSelector: {}
 tolerations: []
-affinity: {} 
+affinity: {}

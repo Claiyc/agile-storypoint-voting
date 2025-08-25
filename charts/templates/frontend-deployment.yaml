@@ -14,6 +14,10 @@ spec:
       labels:
         app: {{ include "agile-app.fullname" . }}-frontend
     spec:
+      {{- if .Values.imagePullSecretName }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecretName }}
+      {{- end }}
       containers:
         - name: frontend
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
@@ -26,4 +30,4 @@ spec:
               value: "{{ $value }}"
             {{- end }}
           resources:
-            {{- toYaml .Values.frontend.resources | nindent 12 }} 
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
