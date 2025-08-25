@@ -14,9 +14,11 @@ frontend:
     NUXT_PUBLIC_GOTO_BASE_URL: https://www.google.com/search?q=  # Default for the "Go to" button
   resources: {}
   ingress:
-    enabled: false
-    className: ""
-    annotations: {}
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     hosts:
       - host: frontend.local
         paths:

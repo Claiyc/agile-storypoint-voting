@@ -5,8 +5,7 @@ metadata:
   name: {{ include "agile-app.fullname" . }}-ingress
   annotations:
     {{- if .Values.frontend.ingress.enabled }}
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      try_files $uri $uri/ /index.html;
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
     {{- end }}
     {{- if .Values.frontend.ingress.annotations }}
     {{- toYaml .Values.frontend.ingress.annotations | nindent 4 }}
@@ -23,6 +22,13 @@ spec:
         paths:
           - path: /
             pathType: Prefix
+            backend:
+              service:
+                name: {{ include "agile-app.fullname" $ }}-frontend
+                port:
+                  number: {{ $.Values.frontend.service.port }}
+          - path: /(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ include "agile-app.fullname" $ }}-frontend
