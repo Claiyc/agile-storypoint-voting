@@ -1,12 +1,9 @@
-{{- if or .Values.frontend.ingress.enabled .Values.backend.ingress.enabled }}
+{{- if .Values.frontend.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "agile-app.fullname" . }}-ingress
   annotations:
-    {{- if .Values.frontend.ingress.enabled }}
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    {{- end }}
     {{- if .Values.frontend.ingress.annotations }}
     {{- toYaml .Values.frontend.ingress.annotations | nindent 4 }}
     {{- end }}
@@ -20,22 +17,40 @@ spec:
     - host: {{ .host }}
       http:
         paths:
-          - path: /
+          {{- range .paths }}
+          - path: {{ . }}
             pathType: Prefix
             backend:
               service:
-                name: {{ include "agile-app.fullname" $ }}-frontend
+                name: {{ include "agile-app.fullname" $ }}-backend
                 port:
                   number: {{ $.Values.frontend.service.port }}
-          - path: /(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ include "agile-app.fullname" $ }}-frontend
-                port:
-                  number: {{ $.Values.frontend.service.port }}
+          {{- end }}
     {{- end }}
     {{- end }}
+  {{- if .Values.frontend.ingress.tls }}
+  tls:
+    {{- toYaml .Values.frontend.ingress.tls | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+---
+
+{{- if .Values.backend.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "agile-app.fullname" . }}-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    {{- if .Values.backend.ingress.annotations }}
+    {{- toYaml .Values.backend.ingress.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.backend.ingress.className }}
+  ingressClassName: {{ .Values.backend.ingress.className }}
+  {{- end }}
+  rules:
     {{- if .Values.backend.ingress.enabled }}
     {{- range .Values.backend.ingress.hosts }}
     - host: {{ .host }}
@@ -52,8 +67,8 @@ spec:
           {{- end }}
     {{- end }}
     {{- end }}
-  {{- if .Values.frontend.ingress.tls }}
+  {{- if .Values.backend.ingress.tls }}
   tls:
-    {{- toYaml .Values.frontend.ingress.tls | nindent 4 }}
+    {{- toYaml .Values.backend.ingress.tls | nindent 4 }}
   {{- end }}
-{{- end }} 
+{{- end }}

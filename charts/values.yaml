@@ -20,8 +20,9 @@ frontend:
     enabled: true
     className: "nginx"
     annotations:
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/rewrite-target: /$1
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     hosts:
       - host: frontend.local
         paths:
@@ -46,9 +47,15 @@ backend:
     # OLLAMA_URL: "http://ollama:11434" # If using internal Ollama
   resources: {}
   ingress:
-    enabled: false
-    className: ""
-    annotations: {}
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+      nginx.ingress.kubernetes.io/use-http2: "false"
     hosts:
       - host: backend.local
         paths:
