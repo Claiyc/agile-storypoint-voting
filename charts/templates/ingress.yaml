@@ -22,7 +22,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "agile-app.fullname" $ }}-backend
+                name: {{ include "agile-app.fullname" $ }}-frontend
                 port:
                   number: {{ $.Values.frontend.service.port }}
           {{- end }}
