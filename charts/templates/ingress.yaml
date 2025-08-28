@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "agile-app.fullname" . }}-ingress
+  name: {{ include "agile-app.fullname" . }}-fe-ingress
   annotations:
     {{- if .Values.frontend.ingress.annotations }}
     {{- toYaml .Values.frontend.ingress.annotations | nindent 4 }}
@@ -40,7 +40,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "agile-app.fullname" . }}-ingress
+  name: {{ include "agile-app.fullname" . }}-be-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     {{- if .Values.backend.ingress.annotations }}
